@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity">
+    <item android:id="@+id/action_leftTop"
+          android:orderInCategory="100"
+          app:showAsAction="never"
+          android:title="左上"/>
+    <item android:id="@+id/action_rightTop"
+          android:orderInCategory="100"
+          app:showAsAction="never"
+          android:title="右上"
+          />
+     <item android:id="@+id/action_leftBottom"
+           android:orderInCategory="100"
+           app:showAsAction="never"
+           android:title="左下"
+           />
+    <item android:id="@+id/action_rightBottom"
+          android:orderInCategory="100"
+          app:showAsAction="never"
+          android:title="右下"
+        />
+
+
+
+</menu>
