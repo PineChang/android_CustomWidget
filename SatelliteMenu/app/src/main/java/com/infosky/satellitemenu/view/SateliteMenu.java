@@ -11,6 +11,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 
 import com.infosky.satellitemenu.R;
 
@@ -145,7 +146,7 @@ public class SateliteMenu extends ViewGroup implements View.OnClickListener {
             //左上
             int miLeft = (int)(mRadius*sinValue);
             int miTop  =  (int)(mRadius*cosValue);
-            if(mPosition==Position.POS_RIGHT_BOTTOM ||　mPosition==Position.POS_RIGHT_TOP){
+            if(mPosition==Position.POS_RIGHT_BOTTOM || mPosition==Position.POS_RIGHT_TOP){
                 miLeft  = getMeasuredWidth()-(int)(mRadius*sinValue)-miWidth;
             }
             if(mPosition==Position.POS_LEFT_BOTTOM || mPosition==Position.POS_RIGHT_BOTTOM){
@@ -231,9 +232,80 @@ public class SateliteMenu extends ViewGroup implements View.OnClickListener {
         int count = getChildCount();
         for (int i = 1; i <count ; i++) {
             final View  child = getChildAt(i);
+            //----------------------------------------------计算平移坐标和构建平移动画
+            int xflag = 1,yflag=1;
+            if(mPosition==Position.POS_LEFT_BOTTOM  || mPosition==Position.POS_LEFT_TOP){
+                xflag = -1;
+            }
+            if(mPosition ==Position.POS_RIGHT_TOP || mPosition == Position.POS_LEFT_TOP){
+                yflag = -1;
+            }
+            double angle = 90/(count-2);
+            int oppositeLen = (int)(mRadius*Math.sin(Math.PI/2/(count-2)*(i-1)));
+            int adjacentLen  = (int)(mRadius*Math.sin(Math.PI/2/(count-2)*(i-1)));
 
+            int stopx = xflag*oppositeLen;
+            int stopy = xflag*adjacentLen;
 
+            AnimationSet set = new AnimationSet(true);
+            if(mStatus == STATUS_OPEN){
+                //如果是打开那么就要关闭;
+                //相对的是自身;自身此时坐标是0,0
+                TranslateAnimation transAnim = new TranslateAnimation(0,stopx,0,stopy);
+                set.addAnimation(transAnim);
+                AlphaAnimation  alphaAnim = new AlphaAnimation(1.0f,0);
+                set.addAnimation(alphaAnim);
+                set.setAnimationListener(new Animation.AnimationListener(){
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        //在动画开始的时候就不要让item当前的item变得可以点击
+                        setItemClickable(child,false);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+            }else{
+                //如果要打开
+                //那么真好相反
+                TranslateAnimation transAnim = new TranslateAnimation(stopx,0,stopy,0);
+                set.addAnimation(transAnim);
+                AlphaAnimation alphaAnim  = new AlphaAnimation(0.0f,1.0f);
+                set.addAnimation(alphaAnim);
+                set.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        setItemClickable(child,false);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+            }
+            //-------------------------------------------------------------------
+            //开始动画
+            set.setDuration(duration);
+            set.setFillAfter(true);
+            child.startAnimation(set);
         }
+
+        //执行完动画后,将状态改为相反
+        mStatus = (mStatus==STATUS_OPEN?STATUS_CLOSE:STATUS_OPEN);
     }
     //当点击某一个菜单项的时候,这个菜单项变大,其他菜单项,都变小
     private void  itemAnim(int position){
