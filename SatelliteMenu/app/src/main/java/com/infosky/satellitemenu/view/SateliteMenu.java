@@ -6,6 +6,11 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
 
 import com.infosky.satellitemenu.R;
 
@@ -95,11 +100,7 @@ public class SateliteMenu extends ViewGroup implements View.OnClickListener {
         //3拿到初始化的状态值为关闭状态
         mStatus = STATUS_CLOSE;
     }
-    //当点击这个Satellite的时候传递进来的视图
-    @Override
-    public void onClick(View view) {
 
-    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec,int heightMeasureSpec){
@@ -161,7 +162,7 @@ public class SateliteMenu extends ViewGroup implements View.OnClickListener {
                         //当点击的时候就把点击的的按钮是谁,是第几个按钮的信息传递出去
                         mMenuItemClickListener.onItemClick(view,pos);
                         //第二步,就执行动画
-                        itemAinm(pos);
+                        itemAnim(pos);
 
                     }
                     //当上面执行完后,就把状态改为 关闭状态
@@ -201,6 +202,91 @@ public class SateliteMenu extends ViewGroup implements View.OnClickListener {
         }
         //子元素通过layout方法来布局自己
         mMenuButton.layout(mbLeft,mbTop,mbLeft+mbWidth,mbTop+mbHeight);
+        //菜单按钮的点击事件让卫星按钮本身成为监听者
+        mMenuButton.setOnClickListener(this);
 
+    }
+    //当点击菜单按钮的时候传递进来的视图
+    @Override
+    public void onClick(View view) {
+        //当点击菜单按钮的时候,就让自身转动一下
+        rotateMenuButton(mMenuButton,360,500);
+        //并且让布局好的菜单项们做一下动画,也就是点击第奇数次的时候,让这个MenuItem展开,
+        //偶数的时候让MenuItem隐藏;
+        toggleMenu(500);
+
+    }
+    //首先rotate一下Menubutton;
+    private  void rotateMenuButton(View view,int angle,int duration){
+        RotateAnimation rotAnim  = new RotateAnimation(0,angle,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        rotAnim.setDuration(duration);
+        rotAnim.setFillAfter(true);//这个参数代表,当动画做完后,是否还让view保持原来的状态
+        view.startAnimation(rotAnim);
+
+
+    }
+
+    //展开和隐藏子菜单
+    private  void  toggleMenu(int duration){
+        int count = getChildCount();
+        for (int i = 1; i <count ; i++) {
+            final View  child = getChildAt(i);
+
+
+        }
+    }
+    //当点击某一个菜单项的时候,这个菜单项变大,其他菜单项,都变小
+    private void  itemAnim(int position){
+        View child;
+        int count = getChildCount();
+        for(int i= 1;i<count;i++){
+            child = getChildAt(i);
+            if(position==i){
+                //独立的线程中做的
+                scaleBigAnim(child);
+            }else{
+                //独立的线程中做的
+                scaleSmallAnim(child);
+            }
+            //同时在做动画的的时候让做动画的菜单项变得不能点击
+            //注意动画在执行的过程中也是在独立的线程中做的,所以这个方法,可以在未做完的时候得到调用
+            setItemClickable(child,false);
+        }
+    }
+    //点击的菜单项变大
+    private void scaleBigAnim(View view){
+        //0.5f,代表形变原点在正中央
+        ScaleAnimation scaleAnim = new ScaleAnimation(1.0f,3f,1.0f,3f, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        AlphaAnimation alphaAnim = new AlphaAnimation(1.0f,0);
+        AnimationSet set = new AnimationSet(true);
+        set.addAnimation(alphaAnim);
+        set.addAnimation(scaleAnim);
+        set.setDuration(800);
+        set.setFillAfter(true);
+        view.startAnimation(set);
+
+
+    }
+    //其他未点击的菜单项变小
+    private void scaleSmallAnim(View view){
+        //第一个变化属性
+        ScaleAnimation scaleAnim = new ScaleAnimation(1.0f,0f,1.0f,0f,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        AlphaAnimation alphaAnim = new AlphaAnimation(1.0f,0f);
+
+        AnimationSet  set  = new AnimationSet(true);
+        set.addAnimation(alphaAnim);
+        set.addAnimation(scaleAnim);
+        set.setFillAfter(true);
+        set.setDuration(500);
+        view.startAnimation(set);
+
+
+    }
+
+    private void setItemClickable(View view,boolean flag){
+        //让view不可点击
+        view.setClickable(flag);
+        //并且失去第一响应,其他的view就可以成为第一响应者了;
+        view.setFocusable(flag);
     }
 }
