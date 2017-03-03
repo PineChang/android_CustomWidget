@@ -9,9 +9,11 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.infosky.flowtags.MainActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+<com.infosky.flowtags.view.FlowLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/fl_layout"
+    android:paddingLeft="20sp"
+    android:background="#abc777"
+    ></com.infosky.flowtags.view.FlowLayout>
 </RelativeLayout>
